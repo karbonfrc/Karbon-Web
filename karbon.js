@@ -92,6 +92,7 @@ const FIRMWARE = {
 };
 
 let K = null;
+let PADDING = null;
 
 const GADGETS = {
   pivot:  [0x0d2812, "488b67385fc3"],
