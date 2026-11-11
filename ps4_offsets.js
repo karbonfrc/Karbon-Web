@@ -636,11 +636,21 @@ PS4["14.00"] = Object.assign({}, PS4["13.52"], {
   k_rootvnode: undefined,
 });
 
+export const KARBON_SUPPORTED_FIRMWARES = Object.freeze([
+  '12.00', '12.02', '12.50', '12.52',
+  '13.00', '13.02', '13.04', '13.50', '13.52', '14.00',
+]);
+
 export function offsetsFor(uaString) {
-  const m = (uaString || "").match(/PlayStation\s+4[\/ ](\d+)\.(\d+)/);
+  const m = (uaString || "").match(/PlayStation\s+4[\/ ](\d+)\.([0-9a-fA-F]{2})(?![0-9a-fA-F])/);
   if (!m) return { key: null, off: null };
 
-  const key = m[1] + "." + parseInt(m[2], 16).toString(16).padStart(2, "0");
+  const major = parseInt(m[1], 10);
+  const minor = parseInt(m[2], 16);
+  if (!Number.isSafeInteger(major) || major < 1 || !Number.isInteger(minor))
+    return { key: null, off: null };
+
+  const key = major + "." + minor.toString(16).padStart(2, "0");
   return { key, off: PS4[key] || null };
 }
 

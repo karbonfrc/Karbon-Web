@@ -202,6 +202,13 @@ function leakval(obj) {
 }
 
 function readInto(dest, addr, count) {
+  if (!(dest instanceof Uint8Array))
+    throw new TypeError("mem.readInto: destination must be a Uint8Array");
+  if (!Number.isSafeInteger(count) || count < 0 || count > dest.byteLength)
+    throw new RangeError(
+      `mem.readInto: invalid byte count ${count} for ${dest.byteLength}-byte destination`,
+    );
+
   const base = addrNumber(addr);
   let done = 0;
   while (done < count) {

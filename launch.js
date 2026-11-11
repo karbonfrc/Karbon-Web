@@ -15,7 +15,9 @@ const loadingScreen = document.getElementById("loadingScreen");
 const appCache = window.applicationCache || null;
 
 function selectedPayload() {
-  return picker.querySelector('input[name="payload"]:checked')?.value || "goldhen";
+  const selected = picker && picker.querySelector('input[name="payload"]:checked');
+  const value = selected ? selected.value : "";
+  return Object.prototype.hasOwnProperty.call(TARGET, value) ? value : "goldhen";
 }
 
 function saveSelection() {
@@ -54,6 +56,11 @@ function start() {
   if (cacheBusy()) {
     waitingForCache = true;
     countEl.textContent = "waiting for the cache";
+    return;
+  }
+  if (appCache && appCache.status === appCache.UPDATEREADY) {
+    waitingForCache = false;
+    countEl.textContent = "update ready - reload this page to use it";
     return;
   }
   started = true;

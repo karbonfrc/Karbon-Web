@@ -677,6 +677,7 @@ function startAttempt() {
   if (fakeReleased) return;
   if (stopped) return;
   resetAttemptState();
+  attemptPersisted = false;
   try {
     sessionStorage.setItem(attemptKey, String(attemptNumber));
     attemptPersisted =

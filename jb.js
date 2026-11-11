@@ -1,7 +1,7 @@
 import { establishPrimitive } from "./core.js";
 import { installWindowP, pairStatus } from "./mem.js";
 import { int64 } from "./int64.js";
-import { offsetsFor, PS4 } from "./ps4_offsets.js";
+import { offsetsFor, PS4, KARBON_SUPPORTED_FIRMWARES } from "./ps4_offsets.js";
 
 const outEl = document.getElementById("out");
 const stateEl = document.getElementById("state");
@@ -327,8 +327,7 @@ let mainMf = null,
        re-checks the key. On a firmware it has no stage for, the chain would
        come up in WebKit and then write foreign addresses into the kernel --
        so it is refused here, before anything is touched. */
-    const SUPPORTED = ["14.00", "13.52", "13.50", "13.04", "13.02", "13.00",
-                   "12.52", "12.50", "12.02", "12.00"];
+    const SUPPORTED = KARBON_SUPPORTED_FIRMWARES;
     if (params.get("karbon") && SUPPORTED.indexOf(fwKey) < 0) {
       mark("FW-UNSUPPORTED", fwKey + " -- this build has a kernel stage for "
            + SUPPORTED.join(", ") + " only");

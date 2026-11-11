@@ -2,7 +2,7 @@
 set -e
 cd "$(dirname "$0")"
 OUT=cache.appcache
-FILES="index.html jb.html launch.js logo.png
+FILES="index.html jb.html upload.html launch.js logo.png
        jb.js core.js mem.js int64.js ps4_offsets.js karbon.js
        patchset-1200.bin patchset-1202.bin patchset-1250.bin patchset-1252.bin
        patchset-1300.bin patchset-1302.bin patchset-1304.bin patchset-1350.bin
@@ -25,6 +25,7 @@ FILES="index.html jb.html launch.js logo.png
   echo "*"
 } > "$OUT"
 echo "$OUT: $(grep -cE '^[^#[:space:]]+ #' "$OUT") entries, $(wc -c < "$OUT") bytes"
+
 
 
 

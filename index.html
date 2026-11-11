@@ -125,6 +125,20 @@
         opacity: 0.75;
       }
 
+      .tool-card { width:100%; margin:0 0 18px; padding:14px; border:1px solid var(--border); border-radius:12px; background:#151515; }
+.tool-heading { margin:0 0 10px; color:#e5e5e5; font:600 11px/1.4 var(--mono); letter-spacing:.1em; text-transform:uppercase; }
+.check-row { display:flex; justify-content:space-between; gap:12px; padding:6px 0; border-top:1px solid #242424; font:11px/1.4 var(--mono); }
+.check-label { color:#999; }
+.check-value { color:#f2f2f2; text-align:right; }
+.check-value.ok { color:#86d39b; }
+.check-value.bad { color:#f2c14e; }
+.support-toast { position:fixed; right:20px; bottom:20px; z-index:30; display:flex; align-items:center; gap:11px; max-width:calc(100vw - 32px); padding:13px 17px; border:1px solid #35543d; border-radius:12px; background:#1b2920; color:#e8f6eb; box-shadow:0 12px 32px #0008; font:600 13px/1.3 var(--sans); opacity:0; pointer-events:none; transform:translateX(32px); }
+.support-toast.show { animation:supportToast 3s cubic-bezier(.2,.75,.25,1) both; }
+.support-toast.unsupported { border-color:#65413f; background:#2b1d1c; color:#ffe9e7; }
+.support-toast-icon { display:grid; width:24px; height:24px; flex:none; place-items:center; border:2px solid #69c17a; border-radius:50%; color:#82dc92; font-size:16px; }
+.support-toast.unsupported .support-toast-icon { border-color:#ed827a; color:#ff9189; }
+@keyframes supportToast { 0% { opacity:0; transform:translateX(32px); } 12%,78% { opacity:1; transform:translateX(0); } 100% { opacity:0; transform:translateX(24px); } }
+.tool-link { display:block; margin-top:10px; color:#c8c8c8; font:11px/1.5 var(--mono); text-align:center; text-decoration:underline; text-underline-offset:3px; }
       .options {
         display: flex;
         flex-direction: column;
@@ -263,6 +277,8 @@
         min-height: 1em;
       }
 
+      .package-link { margin-top:18px; color:#bbb; font:11px/1.5 var(--mono); text-decoration:underline; text-underline-offset:3px; }
+
       .byline {
         margin-top: 22px;
         font-size: 10px;
@@ -300,6 +316,10 @@
     </style>
   </head>
   <body>
+    <div class="support-toast" id="supportToast" role="status" aria-live="polite">
+      <span class="support-toast-icon" id="supportToastIcon" aria-hidden="true">✓</span>
+      <span id="supportToastText"></span>
+    </div>
     <div class="loading-screen" id="loadingScreen" role="status" aria-live="polite">
       <div class="loading-panel"><p class="loading-label">Loading Karbon</p><div class="loading-track"><div class="loading-fill"></div></div></div>
     </div>
@@ -344,7 +364,23 @@
 
     <p class="byline">by Karbon</p>
     
+    <script type="module">
+      import { offsetsFor, KARBON_SUPPORTED_FIRMWARES } from "./ps4_offsets.js";
+      const firmware = offsetsFor(navigator.userAgent).key;
+      const packageLink = document.querySelector(".package-link");
+      if (packageLink) packageLink.hidden = !!firmware;
+      const isSupported = !!firmware && KARBON_SUPPORTED_FIRMWARES.includes(firmware);
+      const toast = document.getElementById("supportToast");
+      const toastText = document.getElementById("supportToastText");
+      const toastIcon = document.getElementById("supportToastIcon");
+      toast.classList.toggle("unsupported", !isSupported);
+      toastText.textContent = isSupported ? "Your Playstation is Supported" : "Your Playstation is NOT Supported";
+      toastIcon.textContent = isSupported ? "✓" : "×";
+      requestAnimationFrame(() => toast.classList.add("show"));
+    </script>
     <script src="launch.js"></script>
   </body>
 </html>
+
+
 
